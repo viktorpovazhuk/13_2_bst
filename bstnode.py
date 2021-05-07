@@ -10,3 +10,9 @@ class BSTNode(object):
         self.data = data
         self.left = left
         self.right = right
+
+    # def is_leaf(self):
+    #     return list(self.children()) == []
+    #
+    # def children(self):
+    #     return filter(None, [self.left, self.right])
