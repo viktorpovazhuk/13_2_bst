@@ -9,6 +9,10 @@ from bstnode import BSTNode
 from linkedstack import LinkedStack
 # from linkedqueue import LinkedQueue
 from math import log
+import time
+from random import randint, sample as sample_list
+import sys
+from linked_binary_tree import BinarySearchTree
 
 
 class LinkedBST(AbstractCollection):
@@ -27,7 +31,7 @@ class LinkedBST(AbstractCollection):
 
         def recurse(node, level):
             repres = ""
-            if node != None:
+            if node is not None:
                 repres += recurse(node.right, level + 1)
                 repres += "| " * level
                 repres += str(node.data) + "\n"
@@ -80,19 +84,33 @@ class LinkedBST(AbstractCollection):
 
     def find(self, item):
         """If item matches an item in self, returns the
-        matched item, or None otherwise."""
+        matched item, or None otherwise.
+        Inspired to while loop by
+        https://www.geeksforgeeks.org/"""
 
-        def recurse(node):
-            if node is None:
+        current_node = self._root
+        while True:
+            if current_node is None:
                 return None
-            elif item == node.data:
-                return node.data
-            elif item < node.data:
-                return recurse(node.left)
-            else:
-                return recurse(node.right)
+            elif current_node.data == item:
+                return item
+            elif item > current_node.data:
+                current_node = current_node.right
+            elif item < current_node.data:
+                current_node = current_node.left
 
-        return recurse(self._root)
+        # # deprecated solution: recursion limit, longer
+        # def recurse(node):
+        #     if node is None:
+        #         return None
+        #     elif item == node.data:
+        #         return node.data
+        #     elif item < node.data:
+        #         return recurse(node.left)
+        #     else:
+        #         return recurse(node.right)
+        #
+        # return recurse(self._root)
 
     # Mutator methods
     def clear(self):
@@ -302,6 +320,8 @@ class LinkedBST(AbstractCollection):
         '''
         tree = [vertex for vertex in self.inorder()]
 
+        # print(tree[:5])
+
         def rebuild(subtree):
             if len(subtree) < 3:
                 for vertex in subtree:
@@ -382,6 +402,92 @@ class LinkedBST(AbstractCollection):
         :rtype:
         """
 
+        # prepare words and test lists
+        test_words_num = 800
+        # words_num = 200000
+        words_list = self.read_dict(path)
+        # words_list = words_list[:words_num]
+        words_list.sort()
+
+        test_list = sample_list(words_list, test_words_num)
+        # test_list = [words_list[-1]] * test_words_num
+
+        print(f"Test search in structures on {test_words_num} random words",
+              "------------------------",
+              sep="\n")
+
+        # set recursion limit for search in BST
+        # sys.setrecursionlimit(len(words_list) + 1)
+
+        # test search in list
+        start = time.time()
+        for test in test_list:
+            words_list.index(test)
+        end = time.time()
+        print("sorted list: " + str((end - start)) + " s")
+
+        # prepare BST
+        # self.clear()
+        self.replace_ordered_list(words_list)
+        # self._root = BSTNode(words_list[0])
+        # current_node = self._root
+        # for idx in range(1, len(words_list)):
+        #     current_node.right = BSTNode(words_list[idx])
+        #     current_node = current_node.right
+        # time.sleep(10)
+        # print("after sleep")
+
+        start = time.time()
+        for test in test_list:
+            self.find(test)
+        end = time.time()
+        print("BST from sorted list: " + str((end - start)) + " s")
+
+        shuffled = sample_list(words_list, len(words_list))
+        self.clear()
+        for word in shuffled:
+            self.add(word)
+
+        start = time.time()
+        for test in test_list:
+            self.find(test)
+        end = time.time()
+        print("BST from shuffled list: " + str((end - start)) + " s")
+
+        self.rebalance()
+        # print(self._root.data)
+
+        start = time.time()
+        for test in test_list:
+            self.find(test)
+        end = time.time()
+        print("BST rebalanced: " + str((end - start)) + " s")
+
+        # bst = BinarySearchTree(words_list[0])
+        # bst_node = bst
+        # for idx in range(1, len(words_list)):
+        #     bst_node.right_child = BinarySearchTree(words_list[idx])
+        #     bst_node = bst_node.right_child
+        # for test in test_list:
+        #     bst.find_node(test)
+
+    def replace_ordered_list(self, llist):
+        """Replace elements in BST with already ordered list"""
+        self._size = 0
+        self._root = BSTNode(llist[0])
+        current_node = self._root
+        for idx in range(1, len(llist)):
+            current_node.right = BSTNode(llist[idx])
+            current_node = current_node.right
+
+    @staticmethod
+    def read_dict(path):
+        """Read vocabulary"""
+        with open(path) as ffile:
+            lines = ffile.readlines()
+        lines = [line.strip() for line in lines]
+        return lines
+
 
 if __name__ == "__main__":
     # l = LinkedBST([1, 4, 2, 5])
@@ -391,11 +497,15 @@ if __name__ == "__main__":
 
     l2 = LinkedBST([1, 3, 2, 4, 5, 6])
     # print(l2)
-    l2.rebalance()
-    print(l2)
-    print(l2.successor(5))
-    print(l2.predecessor(6))
-    print(l2.range_find(3, 5))
+    # l2.rebalance()
+    # print(l2)
+    # print(l2.successor(5))
+    # print(l2.predecessor(6))
+    # print(l2.range_find(3, 5))
+    #
+    # l3 = LinkedBST([7])
+    # print(l3.predecessor(6))
 
-    l3 = LinkedBST([7])
-    print(l3.predecessor(6))
+    # print(l2.find(1))
+    # print(l2.find(74))
+    l2.demo_bst('words.txt')
