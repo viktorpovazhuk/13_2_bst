@@ -403,7 +403,7 @@ class LinkedBST(AbstractCollection):
         """
 
         # prepare words and test lists
-        test_words_num = 800
+        test_words_num = 10000
         # words_num = 200000
         words_list = self.read_dict(path)
         # words_list = words_list[:words_num]
